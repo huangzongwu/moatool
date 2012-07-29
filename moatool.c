@@ -14,10 +14,10 @@
 
 /**
  * \fn moa_error_t moa_alloc(struct s_mach_file** ptr_mach_file, const char* ptr_filename)
- * \brief Allocate a mach file object.
+ * \brief Create a mach file object based on a file path.
  *
  * \param ptr_mach_file Pointer to mach archive.
- * \param ptr_filename name of the mach file.
+ * \param ptr_filename Path of the mach file.
  *
  * \return MOA_SUCCESS if file alloc succeed, else error number.
  */
@@ -60,7 +60,7 @@ moa_alloc(struct s_mach_file** ptr_mach_file, const char* filename)
 
 /**
  * \fn void moa_dealloc(struct s_mach_file** ptr_mach_file)
- * \brief Free all the allocated memory and close descriptor.
+ * \brief Free all the allocated memory and close file descriptor.
  *
  * \param ptr_mach_file Pointer to mach archive.
  */
@@ -93,6 +93,7 @@ moa_read_fat_section(struct s_mach_file* ptr_mach_file)
 {
 	if (NULL == ptr_mach_file)
 		return MOA_ERR_NULLPTR;
+
 	/// Reset file offset
 	lseek(ptr_mach_file->fd, (off_t)0, SEEK_SET);
 
@@ -114,7 +115,7 @@ moa_read_fat_section(struct s_mach_file* ptr_mach_file)
 		return MOA_ERR_UNKNOW_ARCH;
 
 	/// Read the N fat archs
-	if (ptr_mach_file->fat_section.fat_archs != NULL) // Avoid memory leaks ;)
+	if (ptr_mach_file->fat_section.fat_archs != NULL)
 		free(ptr_mach_file->fat_section.fat_archs);
 
 	const size_t fat_arch_size = ptr_mach_file->fat_section.fat_header.nfat_arch * sizeof(*ptr_mach_file->fat_section.fat_archs);
@@ -167,7 +168,7 @@ moa_reduce(struct s_mach_file* ptr_mach_file)
 
 	/// Get the optimal buffer size and allocate
 	const blksize_t best_buf_size = ptr_mach_file->file_stats.st_blksize;
-	byte* buffer = (byte*)calloc((size_t)best_buf_size, sizeof(byte));
+	moa_byte_t* buffer = (moa_byte_t*)calloc((size_t)best_buf_size, sizeof(moa_byte_t));
 
 	/// Copy the good arch
 	ssize_t bytes_read = 0;
@@ -217,6 +218,7 @@ moa_split(struct s_mach_file* ptr_mach_file)
 {
 	if (NULL == ptr_mach_file)
 		return MOA_ERR_NULLPTR;
+
 	ushort un;
 	for (un = 0; un < ptr_mach_file->fat_section.fat_header.nfat_arch; un++)
 	{
@@ -229,19 +231,19 @@ moa_split(struct s_mach_file* ptr_mach_file)
 		switch (ptr_mach_file->fat_section.fat_archs[un].cputype)
 		{
 			case CPU_TYPE_X86:
-				strncat(new_filename, "_X86", (size_t)7);
+				strncat(new_filename, "_X86", 7);
 				break;
 			case CPU_TYPE_X86_64:
-				strncat(new_filename, "_X86_64", (size_t)7);
+				strncat(new_filename, "_X86_64", 7);
 				break;
 			case CPU_TYPE_POWERPC:
-				strncat(new_filename, "_PPC", (size_t)7);
+				strncat(new_filename, "_PPC", 7);
 				break;
 			case CPU_TYPE_POWERPC64:
-				strncat(new_filename, "_PPC_64", (size_t)7);
+				strncat(new_filename, "_PPC_64", 7);
 				break;
 			default:
-				strncat(new_filename, "_UNKNOW", (size_t)7);
+				strncat(new_filename, "_UNKNOW", 7);
 		}
 		printf("Creating %s (%u bytes)... ", new_filename, ptr_mach_file->fat_section.fat_archs[un].size);
 
@@ -259,7 +261,7 @@ moa_split(struct s_mach_file* ptr_mach_file)
 
 		/// Get the optimal buffer size and allocate
 		const blksize_t best_buf_size = ptr_mach_file->file_stats.st_blksize;
-		byte* buffer = (byte*)calloc((size_t)best_buf_size, sizeof(byte));
+		moa_byte_t* buffer = (moa_byte_t*)calloc((size_t)best_buf_size, sizeof(moa_byte_t));
 
 		/// Copy the arch
 		ssize_t bytes_read = 0;
@@ -308,6 +310,7 @@ moa_is_mach_archive(const struct s_mach_file* ptr_mach_file)
 {
 	if (NULL == ptr_mach_file)
 		return FALSE;
+
 	const uint32_t magic = ptr_mach_file->fat_section.fat_header.magic;
 	return (FAT_MAGIC == magic || FAT_CIGAM == magic);
 }

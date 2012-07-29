@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-typedef unsigned char	byte;
+typedef unsigned char	moa_byte_t;
 typedef char			moa_boolean_t;
 typedef int				moa_error_t;
 
@@ -44,8 +44,8 @@ struct s_mach_file
 
 #define MOA_VERSION	"1.1.0"
 
-moa_error_t		moa_alloc(struct s_mach_file**, const char*);
-void			moa_dealloc(struct s_mach_file**);
+moa_error_t		moa_alloc(struct s_mach_file** ptr_mach_file, const char* filename);
+void			moa_dealloc(struct s_mach_file** ptr_mach_file);
 
 moa_error_t		moa_read_fat_section(struct s_mach_file*);
 moa_error_t		moa_reduce(struct s_mach_file*);

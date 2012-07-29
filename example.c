@@ -19,17 +19,17 @@ int main(int argc, char** argv)
 	struct s_mach_file* mach_file = NULL;
 	moa_error_t ret;
 	
-	if ((ret = moa_alloc(&mach_file, argv[2])) != MOA_SUCCESS) // Alloc file
+	if ((ret = moa_alloc(&mach_file, argv[2])) != MOA_SUCCESS)
 	{
 		moa_error(ret);
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 	
 	if ((ret = moa_read_fat_section(mach_file)) != MOA_SUCCESS)
 	{
 		moa_error(ret);
 		moa_dealloc(&mach_file);
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 	
 	switch (mode)
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 			usage(argv[0]);
 	}
 	
-	moa_dealloc(&mach_file); // dealloc our file !
+	moa_dealloc(&mach_file);
 	
 	return EXIT_SUCCESS;
 }
